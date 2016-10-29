@@ -16,6 +16,7 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.telephony.SmsManager;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
@@ -208,14 +209,6 @@ public class MainActivity extends AppCompatActivity {
         }, delay);
     }
 
-    private boolean isDangerous(String filePath) {
-        try {
-            callCloudVision(BitmapFactory.decodeFile(filePath));
-        } catch (IOException e) {
-
-        }
-        return true;
-    }
 
 
     private void callCloudVision(final Bitmap bitmap) throws IOException {
@@ -334,6 +327,45 @@ public class MainActivity extends AppCompatActivity {
             imagePaths.add(mSharedPreference1.getString("Status_" + i, null));
         }
 
+    }
+
+    private boolean isDangerous(String[] detections, int confidence) {
+
+        String[] keywords = {"gun", "firearm", "fire arm", "attack", "threat", "weapon", "ammo",
+                "ammunition", "bullet", "hand gun", "handgun", "rifle", "assault", "machine gun",
+                "gunmetal", "trigger", "burst", "caliber", "choke", "gauge", "gunpowder", "holographic",
+                "cartridge", "assault rifle", "gun barrel", "weapon", "gun accessory", "revolver",
+                "shotgun", "Knife", "blade", "melee", "cold weapon", "hunting knife", "bowie knife",
+                "throwing knife", "fire", "burn", "bomb", "armed", "defuse", "activated", "flame",
+                "campfire", "bonfire", "dynamite", "explosion", "missile", "charge",
+                "geological phenomenon", "thief", "robber", "sneak", "stealing", "steal", "crash",
+                "fall", "danger", "burglar", "accident", "stolen", "break in"};
+        int counter = 0;
+        boolean detectDanger = false;
+        for (int i = 0; i < keywords.length; i++) {
+            for (int j = 0; j < detections.length; j++) {
+                if (keywords[i].toLowerCase().equals(detections[j].toLowerCase())) {
+                    counter = counter + 1;
+                }
+            }
+        }
+
+        if (counter >= confidence)
+            detectDanger = true;
+
+        return detectDanger;
+    }
+
+    private void sendSMS(String[] detections, int confidence) {
+        if (isDangerous(detections, confidence)) {
+            String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+            String number = "7138288185";
+            String message = "OwlSecurity has detected the following threats: " + detections[0] +
+                    "" + detections[1] + "" + detections[2] + " at " + timeStamp;
+            SmsManager manager = SmsManager.getDefault();
+            manager.sendTextMessage(number, null, message, null, null);
+            Toast.makeText(getApplicationContext(), "sent succesfully", Toast.LENGTH_LONG);
+        }
     }
 
 }
