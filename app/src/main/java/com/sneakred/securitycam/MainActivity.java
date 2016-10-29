@@ -3,6 +3,7 @@ package com.sneakred.securitycam;
 import android.Manifest;
 import android.Manifest.permission;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -11,6 +12,7 @@ import android.hardware.Camera.PictureCallback;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -49,7 +51,8 @@ public class MainActivity extends AppCompatActivity {
     private Camera mCamera;
     private CameraPreview mPreview;
     private ArrayList<String> imagePaths = new ArrayList<String>();
-    private int count = 0;
+    private int count;
+
     private PictureCallback mPicture = new PictureCallback() {
         @Override
         public void onPictureTaken(byte[] data, Camera camera) {
@@ -65,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
 
                 mCamera.startPreview();
                 callCloudVision(BitmapFactory.decodeFile(filePath));
-                count++;
+
             } catch (FileNotFoundException e) {
                 //Log.d(TAG, "File not found: " + e.getMessage());
             } catch (IOException e) {
@@ -95,6 +98,12 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         reqPermissions();
 
+        SharedPreferences sharedPref = MainActivity.this.getPreferences(Context.MODE_PRIVATE);
+        //int defaultValue = getResources().getInteger(R.string.saved_high_score_default);
+        count = sharedPref.getInt("count", 0);
+        loadArray();
+
+
         // Create an instance of Camera
         mCamera = getCameraInstance();
         Camera.Parameters param = mCamera.getParameters();
@@ -122,6 +131,13 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         releaseCamera();              // release the camera immediately on pause event
+        SharedPreferences sharedPref = MainActivity.this.getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putInt("count", count);
+        saveArray();
+
+        editor.apply();
+
     }
 
 
@@ -177,11 +193,14 @@ public class MainActivity extends AppCompatActivity {
         h.postDelayed(new Runnable() {
             public void run() {
                 mCamera.takePicture(null, null, mPicture);
+                if (count >= 20) {
 
-                if (count >= 5) {
                     File delete = new File(imagePaths.get(0));
-                    System.out.println(delete.delete());
+                    delete.delete();
                     imagePaths.remove(0);
+
+                } else {
+                    count++;
                 }
 
                 h.postDelayed(this, delay);
@@ -235,7 +254,7 @@ public class MainActivity extends AppCompatActivity {
                         annotateImageRequest.setFeatures(new ArrayList<Feature>() {{
                             Feature labelDetection = new Feature();
                             labelDetection.setType("LABEL_DETECTION");
-                            labelDetection.setMaxResults(5);
+                            labelDetection.setMaxResults(10);
                             add(labelDetection);
                         }});
 
@@ -290,4 +309,31 @@ public class MainActivity extends AppCompatActivity {
 
         return message;
     }
+
+    private void saveArray() {
+        //imagePaths.clear();
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+        SharedPreferences.Editor mEdit1 = sp.edit();
+    /* sKey is an array */
+        mEdit1.putInt("Status_size", imagePaths.size());
+
+        for (int i = 0; i < imagePaths.size(); i++) {
+            mEdit1.remove("Status_" + i);
+            mEdit1.putString("Status_" + i, imagePaths.get(i));
+        }
+
+        mEdit1.apply();
+    }
+
+    private void loadArray() {
+        SharedPreferences mSharedPreference1 = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+        imagePaths.clear();
+        int size = mSharedPreference1.getInt("Status_size", 0);
+
+        for (int i = 0; i < size; i++) {
+            imagePaths.add(mSharedPreference1.getString("Status_" + i, null));
+        }
+
+    }
+
 }
