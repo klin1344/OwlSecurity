@@ -1,9 +1,6 @@
 package com.sneakred.securitycam;
 
-import android.Manifest;
-import android.Manifest.permission;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.hardware.Camera;
@@ -12,8 +9,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.SmsManager;
 import android.view.View;
@@ -55,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
             "ammunition", "bullet", "hand gun", "handgun", "rifle", "assault", "machine gun",
             "gunmetal", "trigger", "burst", "caliber", "choke", "gauge", "gunpowder", "holographic",
             "cartridge", "assault rifle", "gun barrel", "weapon", "gun accessory", "revolver",
-            "shotgun", "Knife", "blade", "melee", "cold weapon", "hunting knife", "bowie knife",
+            "shotgun", "knife", "blade", "melee", "cold weapon", "hunting knife", "bowie knife",
             "throwing knife", "fire", "burn", "bomb", "armed", "defuse", "activated", "flame",
             "campfire", "bonfire", "dynamite", "explosion", "missile", "charge",
             "geological phenomenon", "thief", "robber", "sneak", "stealing", "steal", "crash",
@@ -114,7 +109,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
-        reqPermissions();
 
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         //int defaultValue = getResources().getInteger(R.string.saved_high_score_default);
@@ -236,16 +230,6 @@ public class MainActivity extends AppCompatActivity {
         return mediaFile;
     }
 
-    private void reqPermissions() {
-        if (ContextCompat.checkSelfPermission(MainActivity.this, permission.CAMERA) != PackageManager.PERMISSION_GRANTED
-                && ContextCompat.checkSelfPermission(MainActivity.this, permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
-                && ContextCompat.checkSelfPermission(MainActivity.this, permission.INTERNET) != PackageManager.PERMISSION_GRANTED
-                && ContextCompat.checkSelfPermission(MainActivity.this, permission.ACCESS_NETWORK_STATE) != PackageManager.PERMISSION_GRANTED
-                && ContextCompat.checkSelfPermission(MainActivity.this, permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
-                && ContextCompat.checkSelfPermission(MainActivity.this, permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.INTERNET, Manifest.permission.ACCESS_NETWORK_STATE, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.SEND_SMS}, 1);
-        }
-    }
 
     private void StartRecording() {
         final Handler h = new Handler();
