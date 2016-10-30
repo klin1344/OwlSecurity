@@ -1,11 +1,11 @@
-package com.sneakred.securitycam.services;
+package com.sneakred.owlsecurity.services;
 
 import android.content.Context;
 
-import com.sneakred.securitycam.Constants;
-import com.sneakred.securitycam.imgurmodel.ImageResponse;
-import com.sneakred.securitycam.imgurmodel.ImgurAPI;
-import com.sneakred.securitycam.imgurmodel.Upload;
+import com.sneakred.owlsecurity.Constants;
+import com.sneakred.owlsecurity.imgurmodel.ImageResponse;
+import com.sneakred.owlsecurity.imgurmodel.ImgurAPI;
+import com.sneakred.owlsecurity.imgurmodel.Upload;
 
 import java.lang.ref.WeakReference;
 

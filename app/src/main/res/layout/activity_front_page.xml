@@ -10,7 +10,7 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:background="@drawable/owlnight"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.sneakred.securitycam.FrontPage">
+    tools:context="com.sneakred.owlsecurity.FrontPage">
 
     <Button
         android:text="Emergency Contacts"

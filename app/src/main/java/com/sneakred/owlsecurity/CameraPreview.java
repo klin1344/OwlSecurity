@@ -1,4 +1,4 @@
-package com.sneakred.securitycam;
+package com.sneakred.owlsecurity;
 
 /**
  * Created by Kevin on 10/27/16.

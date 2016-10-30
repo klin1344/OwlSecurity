@@ -1,4 +1,4 @@
-package com.sneakred.securitycam;
+package com.sneakred.owlsecurity;
 
 import android.Manifest;
 import android.Manifest.permission;

@@ -1,4 +1,4 @@
-package com.sneakred.securitycam;
+package com.sneakred.owlsecurity;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

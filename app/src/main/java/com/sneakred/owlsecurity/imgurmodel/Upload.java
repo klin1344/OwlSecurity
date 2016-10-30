@@ -1,4 +1,4 @@
-package com.sneakred.securitycam.imgurmodel;
+package com.sneakred.owlsecurity.imgurmodel;
 
 import java.io.File;
 

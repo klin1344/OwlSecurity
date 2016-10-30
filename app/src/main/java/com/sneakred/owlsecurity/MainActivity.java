@@ -1,4 +1,4 @@
-package com.sneakred.securitycam;
+package com.sneakred.owlsecurity;
 
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -29,9 +29,9 @@ import com.google.api.services.vision.v1.model.Image;
 import com.ibm.watson.developer_cloud.visual_recognition.v3.VisualRecognition;
 import com.ibm.watson.developer_cloud.visual_recognition.v3.model.ClassifyImagesOptions;
 import com.ibm.watson.developer_cloud.visual_recognition.v3.model.VisualClassification;
-import com.sneakred.securitycam.imgurmodel.ImageResponse;
-import com.sneakred.securitycam.imgurmodel.Upload;
-import com.sneakred.securitycam.services.UploadService;
+import com.sneakred.owlsecurity.imgurmodel.ImageResponse;
+import com.sneakred.owlsecurity.imgurmodel.Upload;
+import com.sneakred.owlsecurity.services.UploadService;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;

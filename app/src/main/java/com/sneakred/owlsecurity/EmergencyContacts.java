@@ -1,4 +1,4 @@
-package com.sneakred.securitycam;
+package com.sneakred.owlsecurity;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
