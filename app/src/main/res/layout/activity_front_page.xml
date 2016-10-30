@@ -8,36 +8,17 @@
     android:paddingBottom="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
+    android:background="@drawable/owlnight"
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.sneakred.securitycam.FrontPage">
-
-    <TextView
-        android:text="Owl Security"
-        android:gravity="center"
-        android:layout_width="400dp"
-        android:layout_height="100dp"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginBottom="17dp"
-        android:id="@+id/frontpage_owl_security"
-        android:textAppearance="@android:style/TextAppearance.WindowTitle"
-        android:textSize="50sp"/>
-
-    <Button
-        android:text="Start Owl Security"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/frontpage_start_security"
-        android:layout_below="@+id/frontpage_owl_security"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentEnd="true" />
 
     <Button
         android:text="Emergency Contacts"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/frontpage_emergency_contacts"
-        android:layout_below="@+id/frontpage_start_security"
+        android:color="#d2ecf1"
+        android:layout_above="@+id/frontpage_about"
         android:layout_alignParentStart="true"
         android:layout_alignParentEnd="true" />
 
@@ -46,8 +27,40 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/frontpage_about"
-        android:layout_below="@+id/frontpage_emergency_contacts"
+        android:color="#d2ecf1"
+        android:layout_marginBottom="54dp"
+        android:layout_alignParentBottom="true"
         android:layout_alignParentStart="true"
         android:layout_alignParentEnd="true" />
+
+    <Button
+        android:text="Start Owl Security"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/frontpage_start_security"
+        android:color="#d2ecf1"
+        android:layout_above="@+id/frontpage_emergency_contacts"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true" />
+
+    <TextView
+        android:text="Owl Security"
+        android:gravity="center"
+        android:layout_width="400dp"
+        android:layout_height="100dp"
+        android:id="@+id/frontpage_owl_security"
+        android:textAppearance="@android:style/TextAppearance.WindowTitle"
+        android:textSize="50sp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="15dp" />
+
+    <ImageView
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:src="@drawable/owlogo"
+        android:layout_marginBottom="56dp"
+        android:layout_above="@+id/frontpage_start_security"
+        android:layout_centerHorizontal="true" />
 
 </RelativeLayout>

@@ -45,7 +45,7 @@ public class FrontPage extends AppCompatActivity {
             public void onClick(View v) {
                 Intent startIntent = new Intent(FrontPage.this, MainActivity.class);
                 startActivity(startIntent);
-                startButton.getBackground().setAlpha(128);
+                startButton.getBackground().setAlpha(220);
             }
         });
 
@@ -53,7 +53,7 @@ public class FrontPage extends AppCompatActivity {
             public void onClick(View v) {
                 Intent contactsIntent = new Intent(FrontPage.this, EmergencyContacts.class);
                 startActivity(contactsIntent);
-                contactsButton.getBackground().setAlpha(128);
+                contactsButton.getBackground().setAlpha(220);
             }
         });
 
@@ -61,7 +61,7 @@ public class FrontPage extends AppCompatActivity {
             public void onClick(View v) {
                 Intent aboutIntent = new Intent(FrontPage.this, About.class);
                 startActivity(aboutIntent);
-                contactsButton.getBackground().setAlpha(128);
+                contactsButton.getBackground().setAlpha(220);
             }
         });
 
