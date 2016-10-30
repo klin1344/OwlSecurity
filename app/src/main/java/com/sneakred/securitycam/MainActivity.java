@@ -1,10 +1,6 @@
 package com.sneakred.securitycam;
 
-import android.Manifest;
-import android.Manifest.permission;
-import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.hardware.Camera;
@@ -13,8 +9,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.SmsManager;
 import android.view.View;
@@ -34,6 +28,9 @@ import com.google.api.services.vision.v1.model.BatchAnnotateImagesResponse;
 import com.google.api.services.vision.v1.model.EntityAnnotation;
 import com.google.api.services.vision.v1.model.Feature;
 import com.google.api.services.vision.v1.model.Image;
+import com.ibm.watson.developer_cloud.visual_recognition.v3.VisualRecognition;
+import com.ibm.watson.developer_cloud.visual_recognition.v3.model.ClassifyImagesOptions;
+import com.ibm.watson.developer_cloud.visual_recognition.v3.model.VisualClassification;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -45,14 +42,29 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+
 public class MainActivity extends AppCompatActivity {
+    private static final String CLOUD_VISION_API_KEY = "AIzaSyD10IQjSk6oClBn73afBzlsiF6uVRPttDs";
+    private static final String IBM_KEY = "9137e36957251e14a22a38fd417f2e90c96547f8";
+    private static final String[] keywords = {"gun", "firearm", "fire arm", "attack", "threat", "weapon", "ammo",
+            "ammunition", "bullet", "hand gun", "handgun", "rifle", "assault", "machine gun",
+            "gunmetal", "trigger", "burst", "caliber", "choke", "gauge", "gunpowder", "holographic",
+            "cartridge", "assault rifle", "gun barrel", "weapon", "gun accessory", "revolver",
+            "shotgun", "knife", "blade", "melee", "cold weapon", "hunting knife", "bowie knife",
+            "throwing knife", "fire", "burn", "bomb", "armed", "defuse", "activated", "flame",
+            "campfire", "bonfire", "dynamite", "explosion", "missile", "charge",
+            "geological phenomenon", "thief", "robber", "sneak", "stealing", "steal", "crash",
+            "fall", "danger", "burglar", "accident", "stolen", "break in"};
+
     static String filePath;
-    private static String CLOUD_VISION_API_KEY = "AIzaSyD10IQjSk6oClBn73afBzlsiF6uVRPttDs";
+    VisualRecognition service;
     private Camera mCamera;
     private CameraPreview mPreview;
     private ArrayList<String> imagePaths = new ArrayList<String>();
     private int count;
     private boolean sentSMS = false;
+    private String watsonString;
+    private String[] numbers;
 
     private PictureCallback mPicture = new PictureCallback() {
         @Override
@@ -68,6 +80,7 @@ public class MainActivity extends AppCompatActivity {
                 fos.close();
 
                 mCamera.startPreview();
+                IBMVisualRecognition(filePath);
                 callCloudVision(BitmapFactory.decodeFile(filePath));
 
             } catch (FileNotFoundException e) {
@@ -97,14 +110,22 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
-        getSupportActionBar().hide();
 
-        reqPermissions();
-
-        SharedPreferences sharedPref = MainActivity.this.getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         //int defaultValue = getResources().getInteger(R.string.saved_high_score_default);
-        count = sharedPref.getInt("count", 0);
-        loadArray();
+        count = 0;
+        imagePaths = new ArrayList<String>();
+
+        numbers = new String[5];
+        for (int i = 0; i < 5; i++) {
+            numbers[i] = sharedPref.getString("contact" + (i + 1), "");
+            System.out.println(" numbers " + numbers[i]);
+        }
+
+
+        service = new VisualRecognition(VisualRecognition.VERSION_DATE_2016_05_20);
+        service.setApiKey(IBM_KEY);
+        //service.setUsernameAndPassword("GXXXXxxxxxxx", "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx");
 
 
         // Create an instance of Camera
@@ -130,17 +151,47 @@ public class MainActivity extends AppCompatActivity {
         );
     }
 
+    private void IBMVisualRecognition(final String filePath) throws IOException {
+        new AsyncTask<Object, Void, String>() {
+            @Override
+            protected String doInBackground(Object... params) {
+                try {
+                    //System.out.println("Classify an image");
+                    ClassifyImagesOptions options = new ClassifyImagesOptions.Builder()
+                            .images(new File(filePath))
+                            .build();
+                    VisualClassification result = service.classify(options).execute();
+                    String watsonClassifier = result.getImages().get(0).getClassifiers().get(0).getClasses().get(0).getName();
+                    //System.out.println("IBM " + watsonClassifier);
+                    if (watsonClassifier != null) {
+                        watsonString = watsonClassifier;
+
+                    } else {
+                        watsonString = "";
+                    }
+                } catch (Exception e) {
+
+                }
+
+                return "IBM Visual Recognition API request failed. Check logs for details.";
+            }
+
+
+        }.execute();
+
+
+    }
+
     @Override
     protected void onPause() {
         super.onPause();
+        for (String path : imagePaths) {
+            File delete = new File(path);
+            delete.delete();
+        }
+        imagePaths.clear();
+
         releaseCamera();              // release the camera immediately on pause event
-        SharedPreferences sharedPref = MainActivity.this.getPreferences(Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putInt("count", count);
-        saveArray();
-
-        editor.apply();
-
     }
 
 
@@ -178,26 +229,17 @@ public class MainActivity extends AppCompatActivity {
         return mediaFile;
     }
 
-    private void reqPermissions() {
-        if (ContextCompat.checkSelfPermission(MainActivity.this, permission.CAMERA) != PackageManager.PERMISSION_GRANTED
-                && ContextCompat.checkSelfPermission(MainActivity.this, permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
-                && ContextCompat.checkSelfPermission(MainActivity.this, permission.INTERNET) != PackageManager.PERMISSION_GRANTED
-                && ContextCompat.checkSelfPermission(MainActivity.this, permission.ACCESS_NETWORK_STATE) != PackageManager.PERMISSION_GRANTED
-                && ContextCompat.checkSelfPermission(MainActivity.this, permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
-                && ContextCompat.checkSelfPermission(MainActivity.this, permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.INTERNET, Manifest.permission.ACCESS_NETWORK_STATE, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.SEND_SMS}, 1);
-        }
-    }
 
     private void StartRecording() {
         final Handler h = new Handler();
         final int delay = 2000; //milliseconds
         //mCamera.takePicture(null, null, mPicture);
-        Runnable run = new Runnable() {
+        h.postDelayed(new Runnable() {
             public void run() {
-
+                //do something
                 mCamera.takePicture(null, null, mPicture);
-                if (count >= 20) {
+                //System.out.println("pic taken");
+                if (count >= 10) {
 
                     File delete = new File(imagePaths.get(0));
                     delete.delete();
@@ -206,20 +248,18 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     count++;
                 }
+                //System.out.println(sentSMS);
+                if (!sentSMS) {
+                    h.postDelayed(this, delay);
+                } else {
+                    h.removeCallbacks(this);
+                }
 
-                // h.postDelayed(this, delay);
             }
-        };
-        if (!sentSMS) {
-            h.postDelayed(run, delay);
-        } else {
-            h.removeCallbacks(run);
-        }
+        }, delay);
+
 
     }
-
-
-
     private void callCloudVision(final Bitmap bitmap) throws IOException {
         // Do the real work in an async task, because we need to use the network anyway
         new AsyncTask<Object, Void, String>() {
@@ -271,7 +311,7 @@ public class MainActivity extends AppCompatActivity {
                     //Log.d(TAG, "created Cloud Vision request object, sending request");
 
                     BatchAnnotateImagesResponse response = annotateRequest.execute();
-                    System.out.println(response);
+                    //System.out.println(response);
                     return convertResponseToString(response);
 
                 } catch (GoogleJsonResponseException e) {
@@ -285,11 +325,17 @@ public class MainActivity extends AppCompatActivity {
             }
 
             protected void onPostExecute(String result) {
-                String[] arr = result.split(" ");
-                for (int i = 0; i < arr.length; i++) {
-                    System.out.println(arr[i]);
+                String[] arr = result.split(",");
+                //System.out.println(result);
+                /*for (int i = 0; i < arr.length; i++) {
+                    System.out.println("Google "+ arr[i]);
+                }*/
+                if (isDangerous(arr, 3)) {
+                    sendSMS(arr);
                 }
-                sendSMS(arr, 3);
+
+
+                //sendSMS(arr, 3);
                 //boolean danger = isDangerous(arr, 3);
                 //System.out.println("is Dangerours" + danger);
             }
@@ -306,55 +352,20 @@ public class MainActivity extends AppCompatActivity {
             for (int i = 0; i < labels.size(); i++) {
                 EntityAnnotation label = new EntityAnnotation();
                 if (label != null) {
-                    message += String.format(labels.get(i).getDescription() + " ");
-
+                    message += String.format(labels.get(i).getDescription() + ",");
                 }
 
             }
+            //System.out.println("watsonString " + watsonString);
+            message += watsonString;
+            //System.out.println(message);
 
         }
-
-
+        //System.out.println(message);
         return message;
     }
 
-    private void saveArray() {
-        //imagePaths.clear();
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
-        SharedPreferences.Editor mEdit1 = sp.edit();
-    /* sKey is an array */
-        mEdit1.putInt("Status_size", imagePaths.size());
-
-        for (int i = 0; i < imagePaths.size(); i++) {
-            mEdit1.remove("Status_" + i);
-            mEdit1.putString("Status_" + i, imagePaths.get(i));
-        }
-
-        mEdit1.apply();
-    }
-
-    private void loadArray() {
-        SharedPreferences mSharedPreference1 = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
-        imagePaths.clear();
-        int size = mSharedPreference1.getInt("Status_size", 0);
-
-        for (int i = 0; i < size; i++) {
-            imagePaths.add(mSharedPreference1.getString("Status_" + i, null));
-        }
-
-    }
-
     private boolean isDangerous(String[] detections, int confidence) {
-
-        String[] keywords = {"gun", "firearm", "fire arm", "attack", "threat", "weapon", "ammo",
-                "ammunition", "bullet", "hand gun", "handgun", "rifle", "assault", "machine gun",
-                "gunmetal", "trigger", "burst", "caliber", "choke", "gauge", "gunpowder", "holographic",
-                "cartridge", "assault rifle", "gun barrel", "weapon", "gun accessory", "revolver",
-                "shotgun", "Knife", "blade", "melee", "cold weapon", "hunting knife", "bowie knife",
-                "throwing knife", "fire", "burn", "bomb", "armed", "defuse", "activated", "flame",
-                "campfire", "bonfire", "dynamite", "explosion", "missile", "charge",
-                "geological phenomenon", "thief", "robber", "sneak", "stealing", "steal", "crash",
-                "fall", "danger", "burglar", "accident", "stolen", "break in"};
         int counter = 0;
         boolean detectDanger = false;
         for (int i = 0; i < keywords.length; i++) {
@@ -364,24 +375,26 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
-
         if (counter >= confidence)
             detectDanger = true;
 
         return detectDanger;
     }
 
-    private void sendSMS(String[] detections, int confidence) {
-        if (isDangerous(detections, confidence)) {
-
-            String timeStamp = new SimpleDateFormat("MM-dd-yyyy_HH-mm-ss").format(new Date());
-            String number = "7138288185";
-            String message = "OwlSecurity has detected the following threats: " + detections[0] + ", " +
-                    " " + detections[1] + ", and " + detections[2] + " at " + timeStamp;
+    private void sendSMS(String[] detections) {
+        if (!sentSMS) {
+            sentSMS = true;
+            String timeStamp = new SimpleDateFormat("HH:mm:ss, MM/dd/yyyy").format(new Date());
+            String number = "7143264413";
+            String message = "OwlSecurity has detected the following threats: " + detections[0] + ", " + detections[1] + ", and " + detections[2] + " at " + timeStamp + ".";
+            message += "911 has been alerted.";
             SmsManager manager = SmsManager.getDefault();
             manager.sendTextMessage(number, null, message, null, null);
-            sentSMS = true;
+            for (int i = 0; i < numbers.length; i++) {
+                if (!numbers[i].equals("")) {
+                    manager.sendTextMessage(numbers[i], null, message, null, null);
+                }
+            }
         }
     }
-
 }
