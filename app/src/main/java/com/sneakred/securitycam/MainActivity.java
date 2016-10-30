@@ -2,7 +2,6 @@ package com.sneakred.securitycam;
 
 import android.Manifest;
 import android.Manifest.permission;
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -69,7 +68,8 @@ public class MainActivity extends AppCompatActivity {
     private int count;
     private boolean sentSMS = false;
     private String watsonString;
-    ;
+    private String[] numbers;
+
     private PictureCallback mPicture = new PictureCallback() {
         @Override
         public void onPictureTaken(byte[] data, Camera camera) {
@@ -116,10 +116,16 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         reqPermissions();
 
-        SharedPreferences sharedPref = MainActivity.this.getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         //int defaultValue = getResources().getInteger(R.string.saved_high_score_default);
         count = sharedPref.getInt("count", 0);
         loadArray();
+
+        numbers = new String[5];
+        for (int i = 0; i < 5; i++) {
+            numbers[i] = sharedPref.getString("contact" + (i + 1), "");
+            System.out.println(" numbers " + numbers[i]);
+        }
 
 
         service = new VisualRecognition(VisualRecognition.VERSION_DATE_2016_05_20);
@@ -184,7 +190,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        SharedPreferences sharedPref = MainActivity.this.getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.putInt("count", count);
         saveArray();
@@ -259,6 +265,7 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     count++;
                 }
+                //System.out.println(sentSMS);
                 if (!sentSMS) {
                     h.postDelayed(this, delay);
                 } else {
@@ -380,8 +387,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void saveArray() {
         //imagePaths.clear();
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
-        SharedPreferences.Editor mEdit1 = sp.edit();
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        SharedPreferences.Editor mEdit1 = sharedPref.edit();
     /* sKey is an array */
         mEdit1.putInt("Status_size", imagePaths.size());
 
@@ -394,12 +401,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadArray() {
-        SharedPreferences mSharedPreference1 = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         imagePaths.clear();
-        int size = mSharedPreference1.getInt("Status_size", 0);
+        int size = sharedPref.getInt("Status_size", 0);
 
         for (int i = 0; i < size; i++) {
-            imagePaths.add(mSharedPreference1.getString("Status_" + i, null));
+            imagePaths.add(sharedPref.getString("Status_" + i, null));
         }
 
     }
@@ -421,13 +428,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void sendSMS(String[] detections) {
-        String timeStamp = new SimpleDateFormat("MM-dd-yyyy_HH-mm-ss").format(new Date());
-        String number = "7143264413";
-        String message = "OwlSecurity has detected the following threats: " + detections[0] + ", " +
-                " " + detections[1] + ", and " + detections[2] + " at " + timeStamp;
-        SmsManager manager = SmsManager.getDefault();
-        manager.sendTextMessage(number, null, message, null, null);
-        sentSMS = true;
+        if (!sentSMS) {
+            sentSMS = true;
+            String timeStamp = new SimpleDateFormat("HH:mm:ss, MM/dd/yyyy").format(new Date());
+            String number = "7143264413";
+            String message = "OwlSecurity has detected the following threats: " + detections[0] + ", " + detections[1] + ", and " + detections[2] + " at " + timeStamp + ".";
+            message += "911 has been alerted.";
+            SmsManager manager = SmsManager.getDefault();
+            manager.sendTextMessage(number, null, message, null, null);
+            for (int i = 0; i < numbers.length; i++) {
+                if (!numbers[i].equals("")) {
+                    manager.sendTextMessage(numbers[i], null, message, null, null);
+                }
+            }
+        }
     }
-
 }
