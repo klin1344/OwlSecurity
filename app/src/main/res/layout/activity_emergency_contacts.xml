@@ -21,67 +21,63 @@
         android:textSize="30sp"/>
 
     <EditText
-        android:id="@+id/emergencycontacts_phone_three"
+        android:id="@+id/emergencycontacts_phone_one"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentStart="true"
-        android:layout_below="@+id/emergencycontacts_phone_two"
-        android:layout_marginTop="29dp"
+        android:layout_marginTop="38dp"
         android:ems="10"
-        android:hint="Emergency Contact 3"
+        android:hint="Emergency Contact 1"
         android:inputType="phone"
-        android:text=""/>
-
-    <EditText
-        android:id="@+id/emergencycontacts_phone_four"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
+        android:text=""
+        android:layout_below="@+id/emergencycontacts_title"
         android:layout_alignParentStart="true"
-        android:layout_below="@+id/emergencycontacts_phone_three"
-        android:layout_marginTop="34dp"
-        android:ems="10"
-        android:hint="Emergency Contact 4"
-        android:inputType="phone"
-        android:text=""/>
+        android:layout_alignParentEnd="true" />
 
     <EditText
         android:id="@+id/emergencycontacts_phone_two"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentStart="true"
-        android:layout_below="@+id/emergencycontacts_phone_one"
-        android:layout_marginTop="30dp"
         android:ems="10"
         android:hint="Emergency Contact 2"
         android:inputType="phone"
-        android:text=""/>
+        android:text=""
+        android:layout_below="@+id/emergencycontacts_phone_one"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true" />
 
     <EditText
-        android:id="@+id/emergencycontacts_phone_one"
+        android:id="@+id/emergencycontacts_phone_three"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentStart="true"
-        android:layout_below="@+id/emergencycontacts_title"
-        android:layout_marginTop="23dp"
         android:ems="10"
-        android:hint="Emergency Contact 1"
+        android:hint="Emergency Contact 3"
         android:inputType="phone"
-        android:text=""/>
+        android:text=""
+        android:layout_below="@+id/emergencycontacts_phone_two"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true" />
+
+    <EditText
+        android:id="@+id/emergencycontacts_phone_four"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="Emergency Contact 4"
+        android:inputType="phone"
+        android:text=""
+        android:layout_below="@+id/emergencycontacts_phone_three"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true" />
 
     <EditText
         android:id="@+id/emergencycontacts_phone_five"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentStart="true"
-        android:layout_below="@+id/emergencycontacts_phone_four"
-        android:layout_marginTop="34dp"
         android:ems="10"
         android:hint="Emergency Contact 5"
         android:inputType="phone"
-        android:text=""/>
+        android:text=""
+        android:layout_below="@+id/emergencycontacts_phone_four"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true" />
 </RelativeLayout>
