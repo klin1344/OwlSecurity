@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">OwlSecurity</string>
     <string name="apikey">f7247b218e9a41fa8ba7ae9a0b4d3857</string>
+
+    <string name="title_activity_result">ResultActivity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
 </resources>

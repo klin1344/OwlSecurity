@@ -1,5 +1,7 @@
 package com.sneakred.owlsecurity;
 
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -9,6 +11,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.SmsManager;
 import android.widget.FrameLayout;
@@ -87,7 +90,6 @@ public class MainActivity extends AppCompatActivity {
                 FileOutputStream fos = new FileOutputStream(pictureFile);
                 fos.write(data);
                 fos.close();
-
                 mCamera.startPreview();
                 IBMVisualRecognition(filePath);
                 callCloudVision(BitmapFactory.decodeFile(filePath));
@@ -402,6 +404,22 @@ public class MainActivity extends AppCompatActivity {
                     manager.sendTextMessage(numbers[i], null, message, null, null);
                 }
             }
+            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+            builder.setTitle("Security Threat Detected!");
+            builder.setMessage(message + "\nEmergency Contacts have been notified.");
+            builder.setCancelable(false);
+            builder.setPositiveButton("Okay", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    // User clicked OK button
+                    Intent intent = new Intent(MainActivity.this, FrontPage.class);
+                    startActivity(intent);
+
+                }
+            });
+
+
+            AlertDialog dialog = builder.create();
+            dialog.show();
         }
     }
 
@@ -447,6 +465,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
                 uploaded = true;
+
             }
         }
 
