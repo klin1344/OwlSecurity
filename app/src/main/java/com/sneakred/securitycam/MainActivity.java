@@ -181,8 +181,9 @@ public class MainActivity extends AppCompatActivity {
                 && ContextCompat.checkSelfPermission(MainActivity.this, permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
                 && ContextCompat.checkSelfPermission(MainActivity.this, permission.INTERNET) != PackageManager.PERMISSION_GRANTED
                 && ContextCompat.checkSelfPermission(MainActivity.this, permission.ACCESS_NETWORK_STATE) != PackageManager.PERMISSION_GRANTED
-                && ContextCompat.checkSelfPermission(MainActivity.this, permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.INTERNET, Manifest.permission.ACCESS_NETWORK_STATE, permission.READ_EXTERNAL_STORAGE}, 1);
+                && ContextCompat.checkSelfPermission(MainActivity.this, permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+                && ContextCompat.checkSelfPermission(MainActivity.this, permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.INTERNET, Manifest.permission.ACCESS_NETWORK_STATE, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.SEND_SMS}, 1);
         }
     }
 
@@ -276,29 +277,35 @@ public class MainActivity extends AppCompatActivity {
             }
 
             protected void onPostExecute(String result) {
-                Context context = getApplicationContext();
-                CharSequence text = result;
-                int duration = Toast.LENGTH_LONG;
-
-                Toast toast = Toast.makeText(context, text, duration);
-                toast.show();
-                //System.out.println(result);
+                String[] arr = result.split(" ");
+                for (int i = 0; i < arr.length; i++) {
+                    System.out.println(arr[i]);
+                }
+                sendSMS(arr, 3);
+                //boolean danger = isDangerous(arr, 3);
+                //System.out.println("is Dangerours" + danger);
             }
         }.execute();
     }
 
     private String convertResponseToString(BatchAnnotateImagesResponse response) {
-        String message = "I found these things:\n\n";
+        String message = "";
+        //String [] arr = new String[10];
 
         List<EntityAnnotation> labels = response.getResponses().get(0).getLabelAnnotations();
         if (labels != null) {
-            for (EntityAnnotation label : labels) {
-                message += String.format("%.3f: %s", label.getScore(), label.getDescription());
-                message += "\n";
+
+            for (int i = 0; i < labels.size(); i++) {
+                EntityAnnotation label = new EntityAnnotation();
+                if (label != null) {
+                    message += String.format(labels.get(i).getDescription() + " ");
+
+                }
+
             }
-        } else {
-            message += "nothing";
+
         }
+
 
         return message;
     }
