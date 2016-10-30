@@ -11,8 +11,6 @@ import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.SmsManager;
-import android.view.View;
-import android.widget.Button;
 import android.widget.FrameLayout;
 
 import com.google.api.client.extensions.android.http.AndroidHttp;
@@ -31,6 +29,9 @@ import com.google.api.services.vision.v1.model.Image;
 import com.ibm.watson.developer_cloud.visual_recognition.v3.VisualRecognition;
 import com.ibm.watson.developer_cloud.visual_recognition.v3.model.ClassifyImagesOptions;
 import com.ibm.watson.developer_cloud.visual_recognition.v3.model.VisualClassification;
+import com.sneakred.securitycam.imgurmodel.ImageResponse;
+import com.sneakred.securitycam.imgurmodel.Upload;
+import com.sneakred.securitycam.services.UploadService;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -41,6 +42,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -57,7 +62,9 @@ public class MainActivity extends AppCompatActivity {
             "fall", "danger", "burglar", "accident", "stolen", "break in"};
 
     static String filePath;
+    private final String EMERGENCY_NO = "7143264413";
     VisualRecognition service;
+    private String uRL;
     private Camera mCamera;
     private CameraPreview mPreview;
     private ArrayList<String> imagePaths = new ArrayList<String>();
@@ -65,7 +72,8 @@ public class MainActivity extends AppCompatActivity {
     private boolean sentSMS = false;
     private String watsonString;
     private String[] numbers;
-
+    private Upload upload;
+    private ArrayList<String> links = new ArrayList<String>();
     private PictureCallback mPicture = new PictureCallback() {
         @Override
         public void onPictureTaken(byte[] data, Camera camera) {
@@ -123,7 +131,6 @@ public class MainActivity extends AppCompatActivity {
             numbers[i] = sharedPref.getString("contact" + (i + 1), "");
             System.out.println(" numbers " + numbers[i]);
         }
-
 
         service = new VisualRecognition(VisualRecognition.VERSION_DATE_2016_05_20);
         service.setApiKey(IBM_KEY);
@@ -232,6 +239,7 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 //do something
                 mCamera.takePicture(null, null, mPicture);
+
                 //System.out.println("pic taken");
                 if (count >= 10) {
 
@@ -248,6 +256,7 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     h.removeCallbacks(this);
                 }
+
 
             }
         }, delay);
@@ -325,6 +334,7 @@ public class MainActivity extends AppCompatActivity {
                     System.out.println("Google "+ arr[i]);
                 }*/
                 if (isDangerous(arr, 3)) {
+                    uploadImage(filePath);
                     sendSMS(arr);
                 }
 
@@ -376,12 +386,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void sendSMS(String[] detections) {
+
         if (!sentSMS) {
             sentSMS = true;
             String timeStamp = new SimpleDateFormat("HH:mm:ss, MM/dd/yyyy").format(new Date());
-            String number = "7143264413";
+            String number = EMERGENCY_NO;
             String message = "OwlSecurity has detected the following threats: " + detections[0] + ", " + detections[1] + ", and " + detections[2] + " at " + timeStamp + ".";
-            message += "911 has been alerted.";
+            message += "\n911 has been alerted.\nPhoto:\n";
+
             SmsManager manager = SmsManager.getDefault();
             manager.sendTextMessage(number, null, message, null, null);
             for (int i = 0; i < numbers.length; i++) {
@@ -391,4 +403,57 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
+    public void uploadImage(String path) {
+    /*
+      Create the @Upload object
+     */
+        if (!sentSMS) {
+            File chosenFile = new File(path);
+            if (chosenFile == null) return;
+            createUpload(chosenFile);
+        }
+
+
+    /*
+      Start upload
+     */
+        new UploadService(this).Execute(upload, new UiCallback());
+    }
+
+    private void createUpload(File image) {
+        upload = new Upload();
+        upload.image = image;
+
+    }
+
+    private class UiCallback implements Callback<ImageResponse> {
+
+
+        @Override
+        public void success(ImageResponse imageResponse, Response response) {
+            //clearInput();
+            //System.out.println("success");
+            //System.out.println(imageResponse.data.link.toString());
+            uRL = imageResponse.data.link;
+            String photo = "Photo:\n" + uRL;
+            SmsManager manager = SmsManager.getDefault();
+            manager.sendTextMessage(EMERGENCY_NO, null, photo, null, null);
+            for (int i = 0; i < numbers.length; i++) {
+                if (!numbers[i].equals("")) {
+                    manager.sendTextMessage(numbers[i], null, photo, null, null);
+                }
+            }
+        }
+
+        @Override
+        public void failure(RetrofitError error) {
+            //System.out.println("ERROR" );
+            //Assume we have no connection, since error is null
+            if (error == null) {
+                //nackbar.make(findViewById(R.id.rootView), "No internet connection", Snackbar.LENGTH_SHORT).show();
+            }
+        }
+    }
+
 }
