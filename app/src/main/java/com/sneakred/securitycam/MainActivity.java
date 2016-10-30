@@ -20,7 +20,6 @@ import android.telephony.SmsManager;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.Toast;
 
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
@@ -53,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
     private CameraPreview mPreview;
     private ArrayList<String> imagePaths = new ArrayList<String>();
     private int count;
+    private boolean sentSMS = false;
 
     private PictureCallback mPicture = new PictureCallback() {
         @Override
@@ -191,9 +191,9 @@ public class MainActivity extends AppCompatActivity {
         final Handler h = new Handler();
         final int delay = 2000; //milliseconds
         //mCamera.takePicture(null, null, mPicture);
-
-        h.postDelayed(new Runnable() {
+        Runnable run = new Runnable() {
             public void run() {
+
                 mCamera.takePicture(null, null, mPicture);
                 if (count >= 20) {
 
@@ -205,9 +205,15 @@ public class MainActivity extends AppCompatActivity {
                     count++;
                 }
 
-                h.postDelayed(this, delay);
+                // h.postDelayed(this, delay);
             }
-        }, delay);
+        };
+        if (!sentSMS) {
+            h.postDelayed(run, delay);
+        } else {
+            h.removeCallbacks(run);
+        }
+
     }
 
 
@@ -365,13 +371,14 @@ public class MainActivity extends AppCompatActivity {
 
     private void sendSMS(String[] detections, int confidence) {
         if (isDangerous(detections, confidence)) {
-            String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+
+            String timeStamp = new SimpleDateFormat("MM-dd-yyyy_HH-mm-ss").format(new Date());
             String number = "7138288185";
-            String message = "OwlSecurity has detected the following threats: " + detections[0] +
-                    "" + detections[1] + "" + detections[2] + " at " + timeStamp;
+            String message = "OwlSecurity has detected the following threats: " + detections[0] + ", " +
+                    " " + detections[1] + ", and " + detections[2] + " at " + timeStamp;
             SmsManager manager = SmsManager.getDefault();
             manager.sendTextMessage(number, null, message, null, null);
-            Toast.makeText(getApplicationContext(), "sent succesfully", Toast.LENGTH_LONG);
+            sentSMS = true;
         }
     }
 
