@@ -17,6 +17,8 @@ public class EmergencyContacts extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_emergency_contacts);
+        getSupportActionBar().hide();
+
 
 
         num1 = (EditText) findViewById(R.id.emergencycontacts_phone_one);
