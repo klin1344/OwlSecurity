@@ -23,7 +23,7 @@
         android:layout_alignParentEnd="true" />
 
     <Button
-        android:text="About Owl Securities"
+        android:text="About Owl Security"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/frontpage_about"
