@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/OwlSecurity.iml" filepath="$PROJECT_DIR$/OwlSecurity.iml" />
+      <module fileurl="file://$PROJECT_DIR$/SecurityCam.iml" filepath="$PROJECT_DIR$/SecurityCam.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>

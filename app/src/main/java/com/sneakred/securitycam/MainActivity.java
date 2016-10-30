@@ -70,6 +70,7 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<String> imagePaths = new ArrayList<String>();
     private int count;
     private boolean sentSMS = false;
+    private boolean uploaded = false;
     private String watsonString;
     private String[] numbers;
     private Upload upload;
@@ -392,7 +393,7 @@ public class MainActivity extends AppCompatActivity {
             String timeStamp = new SimpleDateFormat("HH:mm:ss, MM/dd/yyyy").format(new Date());
             String number = EMERGENCY_NO;
             String message = "OwlSecurity has detected the following threats: " + detections[0] + ", " + detections[1] + ", and " + detections[2] + " at " + timeStamp + ".";
-            message += "\n911 has been alerted.\nPhoto:\n";
+            message += "\n911 has been alerted.";
 
             SmsManager manager = SmsManager.getDefault();
             manager.sendTextMessage(number, null, message, null, null);
@@ -435,14 +436,17 @@ public class MainActivity extends AppCompatActivity {
             //clearInput();
             //System.out.println("success");
             //System.out.println(imageResponse.data.link.toString());
-            uRL = imageResponse.data.link;
-            String photo = "Photo:\n" + uRL;
-            SmsManager manager = SmsManager.getDefault();
-            manager.sendTextMessage(EMERGENCY_NO, null, photo, null, null);
-            for (int i = 0; i < numbers.length; i++) {
-                if (!numbers[i].equals("")) {
-                    manager.sendTextMessage(numbers[i], null, photo, null, null);
+            if (!uploaded) {
+                uRL = imageResponse.data.link;
+                String photo = "Photo:\n" + uRL;
+                SmsManager manager = SmsManager.getDefault();
+                manager.sendTextMessage(EMERGENCY_NO, null, photo, null, null);
+                for (int i = 0; i < numbers.length; i++) {
+                    if (!numbers[i].equals("")) {
+                        manager.sendTextMessage(numbers[i], null, photo, null, null);
+                    }
                 }
+                uploaded = true;
             }
         }
 
