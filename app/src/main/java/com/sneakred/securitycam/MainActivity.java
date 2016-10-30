@@ -139,16 +139,8 @@ public class MainActivity extends AppCompatActivity {
         FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
         preview.addView(mPreview);
 
-        // Add a listener to the Capture button
-        Button captureButton = (Button) findViewById(R.id.button_capture);
-        captureButton.setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        StartRecording();
-                    }
-                }
-        );
+        StartRecording();
+
     }
 
     private void IBMVisualRecognition(final String filePath) throws IOException {
