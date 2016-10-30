@@ -31,10 +31,7 @@
             android:screenOrientation="landscape"/>
         <activity android:name=".EmergencyContacts"/>
         <activity android:name=".About"/>
-        <activity
-            android:name=".ResultActivity"
-            android:label="@string/title_activity_result">
-        </activity>
+
     </application>
 
 </manifest>
