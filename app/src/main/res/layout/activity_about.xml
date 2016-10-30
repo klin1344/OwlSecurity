@@ -45,7 +45,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/about_paragraph2"
         android:textSize="13dp"
-        android:layout_marginTop="23dp"
+        android:layout_marginTop="16dp"
         android:layout_below="@+id/about_paragraph1"
         android:layout_alignParentStart="true" />
 </RelativeLayout>
