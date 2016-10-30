@@ -144,6 +144,7 @@ public class MainActivity extends AppCompatActivity {
         mCamera = getCameraInstance();
         Camera.Parameters param = mCamera.getParameters();
         param.setPictureSize(800, 600);
+        param.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
         mCamera.setParameters(param);
 
         // Create our Preview view and set it as the content of our activity.
