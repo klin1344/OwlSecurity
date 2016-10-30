@@ -26,6 +26,7 @@
         android:id="@+id/about_paragraph1"
         android:layout_marginTop="26dp"
         android:layout_below="@+id/about_title"
+        android:textSize="13dp"
         android:layout_alignParentStart="true" />
 
     <TextView
@@ -33,16 +34,18 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/about_paragraph3"
-        android:layout_alignParentBottom="true"
+        android:textSize="13dp"
+        android:layout_below="@+id/about_paragraph2"
         android:layout_alignParentStart="true"
-        android:layout_marginBottom="17dp" />
+        android:layout_marginTop="16dp" />
 
     <TextView
         android:text="What if I told you all three of those can be taken care of at the instance it happens without any human interaction whatsoever. What if I told you that the same machine learning technique snapchat uses to put dog ears on your face is the key to revolutionizing a $350 billion-dollar US security market."
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/about_paragraph2"
-        android:layout_above="@+id/about_paragraph3"
-        android:layout_alignParentStart="true"
-        android:layout_marginBottom="18dp" />
+        android:textSize="13dp"
+        android:layout_marginTop="23dp"
+        android:layout_below="@+id/about_paragraph1"
+        android:layout_alignParentStart="true" />
 </RelativeLayout>
