@@ -55,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
             "campfire", "bonfire", "dynamite", "explosion", "missile", "charge",
             "geological phenomenon", "thief", "robber", "sneak", "stealing", "steal", "crash",
             "fall", "danger", "burglar", "accident", "stolen", "break in"};
+
     static String filePath;
     VisualRecognition service;
     private Camera mCamera;
@@ -112,8 +113,8 @@ public class MainActivity extends AppCompatActivity {
 
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         //int defaultValue = getResources().getInteger(R.string.saved_high_score_default);
-        count = sharedPref.getInt("count", 0);
-        loadArray();
+        count = 0;
+        imagePaths = new ArrayList<String>();
 
         numbers = new String[5];
         for (int i = 0; i < 5; i++) {
@@ -172,7 +173,7 @@ public class MainActivity extends AppCompatActivity {
 
                 }
 
-                return "Cloud Vision API request failed. Check logs for details.";
+                return "IBM Visual Recognition API request failed. Check logs for details.";
             }
 
 
@@ -184,15 +185,13 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-        SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putInt("count", count);
-        saveArray();
+        for (String path : imagePaths) {
+            File delete = new File(path);
+            delete.delete();
+        }
+        imagePaths.clear();
 
-        editor.apply();
         releaseCamera();              // release the camera immediately on pause event
-
-
     }
 
 
@@ -240,7 +239,7 @@ public class MainActivity extends AppCompatActivity {
                 //do something
                 mCamera.takePicture(null, null, mPicture);
                 //System.out.println("pic taken");
-                if (count >= 20) {
+                if (count >= 10) {
 
                     File delete = new File(imagePaths.get(0));
                     delete.delete();
@@ -261,9 +260,6 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
-
-
-
     private void callCloudVision(final Bitmap bitmap) throws IOException {
         // Do the real work in an async task, because we need to use the network anyway
         new AsyncTask<Object, Void, String>() {
@@ -367,32 +363,6 @@ public class MainActivity extends AppCompatActivity {
         }
         //System.out.println(message);
         return message;
-    }
-
-    private void saveArray() {
-        //imagePaths.clear();
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-        SharedPreferences.Editor mEdit1 = sharedPref.edit();
-    /* sKey is an array */
-        mEdit1.putInt("Status_size", imagePaths.size());
-
-        for (int i = 0; i < imagePaths.size(); i++) {
-            mEdit1.remove("Status_" + i);
-            mEdit1.putString("Status_" + i, imagePaths.get(i));
-        }
-
-        mEdit1.apply();
-    }
-
-    private void loadArray() {
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-        imagePaths.clear();
-        int size = sharedPref.getInt("Status_size", 0);
-
-        for (int i = 0; i < size; i++) {
-            imagePaths.add(sharedPref.getString("Status_" + i, null));
-        }
-
     }
 
     private boolean isDangerous(String[] detections, int confidence) {
