@@ -23,7 +23,7 @@
         android:text="Tomorrow you may fall in your home from a heart attack, the pasta your making may burst into flames, and a burglar may enter your home with a gun what will you do, better yet what can you do?"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/about_paragraph3"
+        android:id="@+id/about_paragraph1"
         android:layout_marginTop="26dp"
         android:layout_below="@+id/about_title"
         android:layout_alignParentStart="true" />
