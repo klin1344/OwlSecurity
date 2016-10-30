@@ -34,6 +34,9 @@ import com.google.api.services.vision.v1.model.BatchAnnotateImagesResponse;
 import com.google.api.services.vision.v1.model.EntityAnnotation;
 import com.google.api.services.vision.v1.model.Feature;
 import com.google.api.services.vision.v1.model.Image;
+import com.ibm.watson.developer_cloud.visual_recognition.v3.VisualRecognition;
+import com.ibm.watson.developer_cloud.visual_recognition.v3.model.ClassifyImagesOptions;
+import com.ibm.watson.developer_cloud.visual_recognition.v3.model.VisualClassification;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -45,15 +48,28 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+
 public class MainActivity extends AppCompatActivity {
+    private static final String CLOUD_VISION_API_KEY = "AIzaSyD10IQjSk6oClBn73afBzlsiF6uVRPttDs";
+    private static final String IBM_KEY = "9137e36957251e14a22a38fd417f2e90c96547f8";
+    private static final String[] keywords = {"gun", "firearm", "fire arm", "attack", "threat", "weapon", "ammo",
+            "ammunition", "bullet", "hand gun", "handgun", "rifle", "assault", "machine gun",
+            "gunmetal", "trigger", "burst", "caliber", "choke", "gauge", "gunpowder", "holographic",
+            "cartridge", "assault rifle", "gun barrel", "weapon", "gun accessory", "revolver",
+            "shotgun", "Knife", "blade", "melee", "cold weapon", "hunting knife", "bowie knife",
+            "throwing knife", "fire", "burn", "bomb", "armed", "defuse", "activated", "flame",
+            "campfire", "bonfire", "dynamite", "explosion", "missile", "charge",
+            "geological phenomenon", "thief", "robber", "sneak", "stealing", "steal", "crash",
+            "fall", "danger", "burglar", "accident", "stolen", "break in"};
     static String filePath;
-    private static String CLOUD_VISION_API_KEY = "AIzaSyD10IQjSk6oClBn73afBzlsiF6uVRPttDs";
+    VisualRecognition service;
     private Camera mCamera;
     private CameraPreview mPreview;
     private ArrayList<String> imagePaths = new ArrayList<String>();
     private int count;
     private boolean sentSMS = false;
-
+    private String watsonString;
+    ;
     private PictureCallback mPicture = new PictureCallback() {
         @Override
         public void onPictureTaken(byte[] data, Camera camera) {
@@ -68,6 +84,7 @@ public class MainActivity extends AppCompatActivity {
                 fos.close();
 
                 mCamera.startPreview();
+                IBMVisualRecognition(filePath);
                 callCloudVision(BitmapFactory.decodeFile(filePath));
 
             } catch (FileNotFoundException e) {
@@ -105,6 +122,11 @@ public class MainActivity extends AppCompatActivity {
         loadArray();
 
 
+        service = new VisualRecognition(VisualRecognition.VERSION_DATE_2016_05_20);
+        service.setApiKey(IBM_KEY);
+        //service.setUsernameAndPassword("GXXXXxxxxxxx", "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx");
+
+
         // Create an instance of Camera
         mCamera = getCameraInstance();
         Camera.Parameters param = mCamera.getParameters();
@@ -128,16 +150,48 @@ public class MainActivity extends AppCompatActivity {
         );
     }
 
+    private void IBMVisualRecognition(final String filePath) throws IOException {
+        new AsyncTask<Object, Void, String>() {
+            @Override
+            protected String doInBackground(Object... params) {
+                try {
+                    //System.out.println("Classify an image");
+                    ClassifyImagesOptions options = new ClassifyImagesOptions.Builder()
+                            .images(new File(filePath))
+                            .build();
+                    VisualClassification result = service.classify(options).execute();
+                    String watsonClassifier = result.getImages().get(0).getClassifiers().get(0).getClasses().get(0).getName();
+                    //System.out.println("IBM " + watsonClassifier);
+                    if (watsonClassifier != null) {
+                        watsonString = watsonClassifier;
+
+                    } else {
+                        watsonString = "";
+                    }
+                } catch (Exception e) {
+
+                }
+
+                return "Cloud Vision API request failed. Check logs for details.";
+            }
+
+
+        }.execute();
+
+
+    }
+
     @Override
     protected void onPause() {
         super.onPause();
-        releaseCamera();              // release the camera immediately on pause event
         SharedPreferences sharedPref = MainActivity.this.getPreferences(Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.putInt("count", count);
         saveArray();
 
         editor.apply();
+        releaseCamera();              // release the camera immediately on pause event
+
 
     }
 
@@ -191,10 +245,11 @@ public class MainActivity extends AppCompatActivity {
         final Handler h = new Handler();
         final int delay = 2000; //milliseconds
         //mCamera.takePicture(null, null, mPicture);
-        Runnable run = new Runnable() {
+        h.postDelayed(new Runnable() {
             public void run() {
-
+                //do something
                 mCamera.takePicture(null, null, mPicture);
+                //System.out.println("pic taken");
                 if (count >= 20) {
 
                     File delete = new File(imagePaths.get(0));
@@ -204,15 +259,15 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     count++;
                 }
+                if (!sentSMS) {
+                    h.postDelayed(this, delay);
+                } else {
+                    h.removeCallbacks(this);
+                }
 
-                // h.postDelayed(this, delay);
             }
-        };
-        if (!sentSMS) {
-            h.postDelayed(run, delay);
-        } else {
-            h.removeCallbacks(run);
-        }
+        }, delay);
+
 
     }
 
@@ -269,7 +324,7 @@ public class MainActivity extends AppCompatActivity {
                     //Log.d(TAG, "created Cloud Vision request object, sending request");
 
                     BatchAnnotateImagesResponse response = annotateRequest.execute();
-                    System.out.println(response);
+                    //System.out.println(response);
                     return convertResponseToString(response);
 
                 } catch (GoogleJsonResponseException e) {
@@ -283,11 +338,17 @@ public class MainActivity extends AppCompatActivity {
             }
 
             protected void onPostExecute(String result) {
-                String[] arr = result.split(" ");
-                for (int i = 0; i < arr.length; i++) {
-                    System.out.println(arr[i]);
+                String[] arr = result.split(",");
+                //System.out.println(result);
+                /*for (int i = 0; i < arr.length; i++) {
+                    System.out.println("Google "+ arr[i]);
+                }*/
+                if (isDangerous(arr, 3)) {
+                    sendSMS(arr);
                 }
-                sendSMS(arr, 3);
+
+
+                //sendSMS(arr, 3);
                 //boolean danger = isDangerous(arr, 3);
                 //System.out.println("is Dangerours" + danger);
             }
@@ -304,15 +365,16 @@ public class MainActivity extends AppCompatActivity {
             for (int i = 0; i < labels.size(); i++) {
                 EntityAnnotation label = new EntityAnnotation();
                 if (label != null) {
-                    message += String.format(labels.get(i).getDescription() + " ");
-
+                    message += String.format(labels.get(i).getDescription() + ",");
                 }
 
             }
+            //System.out.println("watsonString " + watsonString);
+            message += watsonString;
+            //System.out.println(message);
 
         }
-
-
+        //System.out.println(message);
         return message;
     }
 
@@ -343,16 +405,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private boolean isDangerous(String[] detections, int confidence) {
-
-        String[] keywords = {"gun", "firearm", "fire arm", "attack", "threat", "weapon", "ammo",
-                "ammunition", "bullet", "hand gun", "handgun", "rifle", "assault", "machine gun",
-                "gunmetal", "trigger", "burst", "caliber", "choke", "gauge", "gunpowder", "holographic",
-                "cartridge", "assault rifle", "gun barrel", "weapon", "gun accessory", "revolver",
-                "shotgun", "Knife", "blade", "melee", "cold weapon", "hunting knife", "bowie knife",
-                "throwing knife", "fire", "burn", "bomb", "armed", "defuse", "activated", "flame",
-                "campfire", "bonfire", "dynamite", "explosion", "missile", "charge",
-                "geological phenomenon", "thief", "robber", "sneak", "stealing", "steal", "crash",
-                "fall", "danger", "burglar", "accident", "stolen", "break in"};
         int counter = 0;
         boolean detectDanger = false;
         for (int i = 0; i < keywords.length; i++) {
@@ -362,24 +414,20 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
-
         if (counter >= confidence)
             detectDanger = true;
 
         return detectDanger;
     }
 
-    private void sendSMS(String[] detections, int confidence) {
-        if (isDangerous(detections, confidence)) {
-
-            String timeStamp = new SimpleDateFormat("MM-dd-yyyy_HH-mm-ss").format(new Date());
-            String number = "7138288185";
-            String message = "OwlSecurity has detected the following threats: " + detections[0] + ", " +
-                    " " + detections[1] + ", and " + detections[2] + " at " + timeStamp;
-            SmsManager manager = SmsManager.getDefault();
-            manager.sendTextMessage(number, null, message, null, null);
-            sentSMS = true;
-        }
+    private void sendSMS(String[] detections) {
+        String timeStamp = new SimpleDateFormat("MM-dd-yyyy_HH-mm-ss").format(new Date());
+        String number = "7143264413";
+        String message = "OwlSecurity has detected the following threats: " + detections[0] + ", " +
+                " " + detections[1] + ", and " + detections[2] + " at " + timeStamp;
+        SmsManager manager = SmsManager.getDefault();
+        manager.sendTextMessage(number, null, message, null, null);
+        sentSMS = true;
     }
 
 }
