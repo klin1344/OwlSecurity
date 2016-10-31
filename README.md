@@ -1,6 +1,10 @@
-# OwlSecurity
+OwlSecurity
 
-OwlSecurity. Created at CodeRED Curiosity 2016. Winner for "Best Use of IBM Watson".
+Created at CodeRED Curiosity 2016.
+
+Winner for "Best Use of IBM Watson".
+
+
 
 Turn any phone into a smart security camera that automatically detects for fire, burglars, weapons, accidents, and medical emergencies, texts 911, and alerts emergency contacts.
 
