@@ -1,10 +1,12 @@
 # OwlSecurity
 
-OwlSecurity - Turn any phone into a smart security camera that automatically detects for fire, burglars, weapons, accidents, and medical emergencies, texts 911, and alerts emergency contacts.
+OwlSecurity. Created at CodeRED Curiosity 2016. Winner for "Best Use of IBM Watson".
+
+Turn any phone into a smart security camera that automatically detects for fire, burglars, weapons, accidents, and medical emergencies, texts 911, and alerts emergency contacts.
 
 Keep your home and workplace secure!
 
-Created at CodeRED Curiosity 2016.
+
 
 Tomorrow you may fall in your home from a heart attack, the pasta your making may burst into flames, and a burglar may enter your home with a gun what will you do, better yet what can you do?"
 
